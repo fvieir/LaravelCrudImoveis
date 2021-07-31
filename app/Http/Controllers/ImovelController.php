@@ -36,6 +36,7 @@ class ImovelController extends Controller
      
     public function index(Request $request)
     {
+        //Outra forma de usar a paginação 
         /*$qtd = $request['qtd'] ? :2;
         $page = $request['page'] ? : 1;
 
@@ -47,9 +48,30 @@ class ImovelController extends Controller
         $imoveis = $imoveis->appends(Request::capture()->except('page'));
         //dd($imoveis);*/
 
-        $imoveis = Imovel::paginate(3);
-        return view('imoveis.index',compact('imoveis'));
+        $buscar = $request['buscar'];
+        $tipo = $request['tipo'];
+        $qtde = 3;
         
+        if ($buscar) {
+            $imoveis = DB::table('imovels')
+                            ->where('descricao','like',"%".$buscar."%")
+                            ->orwhere('preco', 'like', "%".$buscar."%")
+                            ->orwhere('finalidade', 'like',"%".$buscar."%")
+                            ->paginate($qtde);
+
+            return view('imoveis.index' , compact('imoveis'));
+
+        } else {
+            if ($tipo) {
+                $imoveis = DB::table('imovels')
+                                ->where('tipo' , '=' , $tipo)
+                                ->paginate($qtde);    
+            } else {
+                $imoveis = Imovel::paginate($qtde);
+            }
+        }
+       
+        return view('imoveis.index',compact('imoveis'));
     }
 
     /**
